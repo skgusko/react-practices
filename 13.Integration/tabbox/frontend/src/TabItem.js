@@ -1,8 +1,9 @@
 import React from 'react';
+import { active } from './assets/scss/TabBox.scss';
 
-function TabItem({name, active}) {
+function TabItem({name, isActive}) {
     return (
-        <li className={active ? 'active' : ''}>
+        <li className={isActive ? active : ''}>
             {name}
         </li>
     );

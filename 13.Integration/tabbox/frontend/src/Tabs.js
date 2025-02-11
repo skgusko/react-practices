@@ -9,7 +9,7 @@ function Tabs({tabs}) {
                 tabs.map(tab => <TabItem
                                     key={tab.no}
                                     name={tab.name}
-                                    active={tab.active}/>)
+                                    isActive={tab.active}/>)
             }
         </ul>
     );
