@@ -4,9 +4,14 @@ import TabItem from './TabItem';
 function Tabs({tabs}) {
     console.log(tabs);
     return (
-            <ul>
-                {tabs.map((tab, index) => <TabItem key={index} name={tab.name} active={tab.active}/>)}
-            </ul>
+        <ul>
+            {
+                tabs.map(tab => <TabItem
+                                    key={tab.no}
+                                    name={tab.name}
+                                    active={tab.active}/>)
+            }
+        </ul>
     );
 }
 
