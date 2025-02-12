@@ -10,25 +10,20 @@ html {
         letter-spacing: -0.25px;
     }
 
+    ul, ol, dl {
+        list-style-type: none;
+    }
+    
     body {
         font-family: 'Space Mono', monospace; 
         display: flex;
         flex-direction: column;
         padding: 32px;
         margin: 60px auto;
-
         :global(#root) {
             :global(#App) {
-                width: 100%;
-
-                ul, ol, dl {
-                    list-style-type: none;
-                }
+                width: 100%
             }
-        }
+        }  
     }
 }
-
-
-
-
