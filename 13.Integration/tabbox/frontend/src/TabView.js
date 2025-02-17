@@ -4,7 +4,8 @@ import {Tab_View} from './assets/scss/TabView.scss';
 function TabView({contents}) {
     return (
         <div className={Tab_View}>
-            {contents}
+            <span>{'hello world!!!!!!'}</span>
+            <span>{contents}</span>
         </div>
     );
 }
