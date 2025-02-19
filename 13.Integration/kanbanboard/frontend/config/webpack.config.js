@@ -34,12 +34,17 @@ module.exports = function(env) {
                 type: 'asset/resource'
             }]
         },
+        devtool: "eval-source-map",
         devServer: {
             host: '0.0.0.0',
             port: 9090,
             liveReload: true,
             compress: true,
-            hot: false
+            hot: false,
+            proxy: [{
+                context: ['/kanbanboard', '/assets'],
+                target: 'http://localhost:8080'
+            }]
         }    
     };
 }

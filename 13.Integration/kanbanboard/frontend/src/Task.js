@@ -1,22 +1,50 @@
 import React, {useState} from 'react';
 import * as styles from './assets/scss/Task.scss';
+import axios from 'axios';
 
-function Task({name, done}) {
+function Task({no, name, done, setToggleData}) {
 
-    const [isChecked, setIsChecked] = useState(done);
-    const controlCheck = () => {
-        setIsChecked(!isChecked); // data.js 내 데이터값 변경 필요~!~!
+    const [isDone, setIsDone] = useState(done == 'Y' ? true : false);
+    
+    const checkHandler = async () => {
+        try {
+            const response = await axios.put(`/kanbanboard/task/${no}`, null, {params: {done: isDone ? 'N' : 'Y'}});
+
+            setIsDone(!isDone);
+        } catch(err) {
+            console.error(err.response ? `${err.response.status} ${err.response.data.message}` : err);
+        }
+    }
+
+    const deleteCard = async (no) => {
+        try {
+            const response = await axios.delete(`/kanbanboard/task/${no}`);
+            const jsonResult = response.data;
+
+            setToggleData(prev => ({
+                ...prev,
+                tasks: prev.tasks.filter(t => t.no != jsonResult.data)
+            }))
+        } catch(err) {
+            console.error(err.response ? `${err.response.status} ${err.response.data.message}` : err);
+        }
     }
 
     return (
         <li className={styles._Task}>
             <input 
                 type='checkbox' 
-                checked={isChecked}
-                onChange={controlCheck}
+                checked={isDone}
+                onChange={checkHandler}
                 />
             {name}
-            <a href='#' className={styles.Task_Remove}></a>
+            <a 
+                href='#' 
+                className={styles.Task_Remove}
+                onClick={(e) => {
+                    e.preventDefault();
+                    deleteCard(no); }
+                }></a>
         </li>
     );
 }
