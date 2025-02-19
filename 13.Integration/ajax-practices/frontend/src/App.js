@@ -23,6 +23,7 @@ function App() {
 
     const [modalData, setModalData] = useState({
         open: false,
+        itemId: 0,
         itemType: '',
         itemName: ''
     })
@@ -53,6 +54,33 @@ function App() {
         }
     }
 
+    const addItemWithImage = async (item) => {
+        try {
+            // const formData = new FormData();
+            // formData.append("name", item.name);
+            // formData.append("type", item.type);
+            // formData.append("file", item.file);
+            
+            // 여러 개 있을 경우 아래 코드로 사용 
+            const formData = Object.keys(item).reduce((formData, key) => {
+                formData.append(key, item[key]);
+                return formData;
+            }, new FormData());
+
+            const response = await axios.post('/item', formData, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            const jsonResult = response.data;
+            setItems([jsonResult.data, ...items])
+
+        } catch(err) {
+            console.error(err.response ? `${err.response.status} ${err.response.data.message}` : err);
+        }
+    }
     
     const fetchItems = async () => {
         try {
@@ -86,9 +114,35 @@ function App() {
             
             setModalData(update(modalData, {
                 open: {$set: true},
+                itemId: {$set: jsonResult.data.id},
                 itemType: {$set: jsonResult.data.type},
                 itemName: {$set: jsonResult.data.name}
             }))
+        } catch(err) {
+            console.error(err.response ? `${err.response.status} ${err.response.data.message}` : err);
+        }
+    }
+
+    const updateItem = async (id, item) => {
+        try {
+            console.log(id, item);
+            const response = await axios.put(`/item/${id}`, new URLSearchParams(item).toString(), {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            });
+            const jsonResult = response.data;
+            const index = items.findIndex((item) => item.id === jsonResult.data.id);
+
+            setItems([...items.slice(0, index), jsonResult.data, ...items.slice(index+1)]);
+            setModalData(update(modalData, {
+                open: {$set: false}, //얘만 해도 됨. 나머지는 clickItemName에서 설정하므로.
+                itemId: {$set: 0},
+                itemType: {$set: ''},
+                itemName: {$set: ''}
+            }))
+
         } catch(err) {
             console.error(err.response ? `${err.response.status} ${err.response.data.message}` : err);
         }
@@ -146,8 +200,7 @@ function App() {
                             })
 
                             // const queryString = serialize(e.target);
-                            const item = serialize(e.target, {hash: true});
-                            
+                            const item = serialize(e.target, {hash: true}); 
                             addItem(item);
                         } catch(err) {
                             console.error(err);
@@ -166,7 +219,28 @@ function App() {
                     <input type={'text'} name={'name'} placeholder={'name'}/>
                     <input type={'submit'} value={'[C]reate (post)'}/>
                 </form>
-                <form>
+                <form
+                    onSubmit={(e) => {
+                        try {
+                            e.preventDefault();
+
+                            Array.from(e.target, (el) => {
+                                if (el.name != '' && el.value === '') {
+                                    throw new Error(`validation ${el.name} is empty`)
+                                }
+                                return null;
+
+                            });
+                            const item = serialize(e.target, {hash:true}); //hash:true -> 객체로 만들게
+                            // file은 serialize가 못 해줘서 수동으로 설정함
+                            item['file'] = e.target['file'].files[0];
+                            
+                            addItemWithImage(item);
+
+                        } catch(err) {
+                            console.error(err);
+                        }
+                    }}>
                     <select name={'type'}>
                         <option>BOOK</option>
                         <option>CLOTHE</option>
@@ -207,7 +281,9 @@ function App() {
                                 <b>{index+1}</b>
                                 <i>{item.type}</i>
                             </span>
-                            <img src={item.image || '/assets/images/no-image.png'} />
+                            <ins style={{
+                                backgroundImage: `url(${item.image || '/assets/images/no-image.png'})`
+                            }}/>
                         </div>
                     </Item>)
                 }
@@ -228,11 +304,13 @@ function App() {
                 overlayClassName={stylesModal.Overlay}
                 style={{content: {width: 280}}}>
                 <h3>Update Item</h3>
-                <form onChange={(e) => {
+                <form onSubmit={(e) => {
                     e.preventDefault();
-                    console.log('내일~~!');
+
+                    const item = serialize(e.target, {hash: true}); //form에서 name, type을 객체로 만듦
+                    updateItem(modalData.itemId, item);
                 }}>
-                 
+
                     <label>TYPE</label>
                     {' '}
                     <select 
