@@ -59,7 +59,7 @@ public class ApiController {
 	}
 	
 	@PutMapping("/task/{no}")
-	public ResponseEntity<JsonResult<Task>> update(@PathVariable Long no, @RequestParam String done) {
+	public ResponseEntity<JsonResult<Task>> update(@PathVariable Long no, String done) {
 		
 		taskRepository.updateDone(no, done);
 		Task task = new Task();
